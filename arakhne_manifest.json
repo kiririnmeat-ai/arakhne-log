@@ -1,8 +1,8 @@
 {
   "name": "アラクネログ",
   "short_name": "アラクネ",
-  "description": "笠川稀里の生活ダッシュボード（日次ログ）",
-  "start_url": "arakhne_log_pwa.html",
+  "start_url": "/arakhne-log/",          // ← ここを絶対パスに
+  "scope": "/arakhne-log/",              // ← スコープも合わせる
   "display": "standalone",
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
