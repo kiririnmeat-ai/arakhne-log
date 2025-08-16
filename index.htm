@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -244,7 +243,7 @@ function draw(c,labels,vals,title,minY,maxY){
 }
 function getWeekStart(date, ws){ const d=new Date(date); d.setHours(0,0,0,0); const day=d.getDay(); const diff=(7+day-ws)%7; d.setDate(d.getDate()-diff); return d }
 
-// Actions
+// 保存・操作
 $("#saveBtn").addEventListener("click", ()=>{ const rec=serialize(); let data=loadAll(); const idx=data.findIndex(r=>r.date===rec.date); if(idx>=0){rec.id=data[idx].id; data[idx]=rec;} else data.push(rec);
   saveAll(data); render(); toast("保存しました"); });
 $("#exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(loadAll(),null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob);
@@ -255,6 +254,8 @@ $("#clearBtn").addEventListener("click", ()=>{ if(confirm("本当に全データ
 $$(".tab").forEach(t=> t.addEventListener("click", ()=>{ $$(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active"); WEEK_START=Number(t.dataset.weekstart);
   localStorage.setItem("week_start",WEEK_START); $("#weekStartSel").value=WEEK_START; render(); }));
 $("#weekStartSel").addEventListener("change", ()=>{ WEEK_START=Number($("#weekStartSel").value); localStorage.setItem("week_start",WEEK_START); $$(".tab").forEach(x=>x.classList.toggle("active",Number(x.dataset.weekstart)===WEEK_START)); render(); });
+
+// 週次PDF
 $("#btnWeeklyPdf").addEventListener("click", ()=>{
   const data=loadAll().sort((a,b)=>a.date<b.date?-1:1); const now=new Date(); const start=getWeekStart(now,WEEK_START); const end=new Date(start); end.setDate(end.getDate()+6);
   const inWeek=d=>{ const t=new Date(d+"T00:00:00"); return t>=start && t<=end; }; const week=data.filter(r=>r.date && inWeek(r.date));
@@ -275,19 +276,19 @@ $("#btnWeeklyPdf").addEventListener("click", ()=>{
     </tbody></table><div style="margin-top:12px" class="no-print"><button onclick="window.print()">PDFに保存（印刷）</button></div></body></html>`);
   win.document.close(); win.focus();
 });
+
+// カレンダー/グラフ
 $("#monthPick").addEventListener("change", renderCalendar);
 $("#printMonth").addEventListener("click", ()=> window.print());
 $("#btnCalendar").addEventListener("click", ()=> document.querySelector('#calendar').scrollIntoView({behavior:"smooth"}));
 $("#btnCharts").addEventListener("click", ()=> document.querySelector('#chartSleep').scrollIntoView({behavior:"smooth"}));
 
-// PWA register
-<!--
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); });
-}
--->
+// ★ 初期はSW登録オフ（表示安定のため）。動作確認後にコメントを外してOK。
+// if("serviceWorker" in navigator){
+//   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); });
+// }
 
-// local notification prompt + simple 22:10 ticker
+// ローカル通知（22:10リマインド）
 async function askNotification(){ if(!("Notification" in window)) return false; if(Notification.permission==="granted") return true;
   if(Notification.permission!=="denied"){ const p=await Notification.requestPermission(); return p==="granted"; } return false; }
 function scheduleReminder(){ const H=22,M=10; setInterval(()=>{ const n=new Date(); if(n.getHours()===H && n.getMinutes()===M && n.getSeconds()<5){
