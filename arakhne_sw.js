@@ -1,9 +1,10 @@
-self.addEventListener('install', (e)=>{
-  e.waitUntil(caches.open('arakhne-cache-v1').then(c=> c.addAll([
-    './arakhne_log_pwa.html',
-    './arakhne_manifest.json'
-  ])));
+// disable service worker
+self.addEventListener("install", e => {
+  self.skipWaiting();
 });
-self.addEventListener('fetch', (e)=>{
-  e.respondWith(caches.match(e.request).then(resp=> resp || fetch(e.request)));
+self.addEventListener("activate", e => {
+  clients.claim();
+});
+self.addEventListener("fetch", e => {
+  return fetch(e.request);
 });
