@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アラクネログ — 稀里の生活ダッシュボード</title>
+<link rel="manifest" href="arakhne_manifest.json">
+<meta name="theme-color" content="#0f1115">
+<style>
+  :root{ --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --text:#e8ebf0; --muted:#9aa3b2; --accent:#8ab4ff; --border:#272b36; --pill:#2a3040; }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0; font-family: system-ui, -apple-system, "Yu Gothic", sans-serif; background:#0b0d12; color:var(--text)}
+  header{position:sticky; top:0; z-index:5; background:rgba(15,17,21,.85); backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:14px 16px; display:flex; gap:8px; align-items:center; justify-content:space-between}
+  header h1{font-size:18px; margin:0}
+  button{background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:10px 12px; border-radius:10px; cursor:pointer}
+  .primary{background:linear-gradient(180deg,#2a6fff,#2a56ff); border-color:#2147d4}
+  .danger{background:linear-gradient(180deg,#ff4d4d,#e63838); border-color:#a71b1b}
+  main{max-width:1100px; margin:24px auto; padding:0 16px 80px}
+  .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:16px} .card{background:#171a21; border:1px solid var(--border); border-radius:16px; overflow:hidden}
+  .card header{padding:16px} .card .content{padding:16px; display:grid; gap:12px}
+  .row{display:grid; gap:12px} .row.cols-2{grid-template-columns:1fr 1fr} .row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  label{font-size:13px; color:var(--muted); margin-bottom:6px; display:block}
+  input, textarea, select{width:100%; padding:10px 12px; background:#1e222b; border:1px solid var(--border); color:var(--text); border-radius:10px; font-size:14px}
+  textarea{min-height:70px} .muted{color:var(--muted); font-size:12px} .pill{display:inline-flex; gap:8px; padding:6px 10px; background:var(--pill); border-radius:999px; font-size:12px}
+  table{width:100%; border-collapse:collapse; font-size:13px} th,td{border-bottom:1px solid var(--border); padding:8px 10px}
+  .tabs{display:flex; gap:6px; padding:8px 8px 0} .tab{padding:8px 10px; border:1px solid var(--border); background:#1e222b; border-radius:999px; cursor:pointer; font-size:12px}
+  .tab.active{background:#2a3040}
+  canvas{display:block; width:100%; height:200px; background:#1e222b; border:1px solid var(--border); border-radius:12px}
+  @media print{ header,.actions,footer,.no-print{display:none!important} body{background:#fff; color:#000} .card{border:1px solid #ccc} }
+  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🕸️ アラクネログ — 笠川稀里（Kiri）</h1>
+    <div class="actions">
+      <button id="btnWeeklyPdf">週次レポートPDF</button>
+      <button id="btnCalendar">カレンダー</button>
+      <button id="btnCharts">グラフ</button>
+      <button id="exportBtn">エクスポート</button>
+      <button id="importBtn">インポート</button>
+      <button id="clearBtn" class="danger">全データ削除</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <header><h2>今日のログ入力</h2></header>
+        <div class="content">
+          <div class="row cols-3">
+            <div><label>日付</label><input type="date" id="date"></div>
+            <div><label>就寝</label><input type="time" id="sleep_time"></div>
+            <div><label>起床</label><input type="time" id="wake_time"></div>
+          </div>
+          <div class="row cols-3">
+            <div><label>覚醒回数</label><input type="number" id="awakenings" min="0" step="1"></div>
+            <div><label>痒み（0–10）</label><input type="number" id="itch" min="0" max="10" step="1"></div>
+            <div><label>気分（0–10）</label><input type="number" id="mood" min="0" max="10" step="1"></div>
+          </div>
+          <div class="row cols-3">
+            <div><label>GERD（逆流）</label><select id="gerd"><option>なし</option><option>軽い</option><option>強い</option></select></div>
+            <div><label>学習/創作（分）</label><input type="number" id="study_min" min="0" step="5"></div>
+            <div><label>大きな出費（円）</label><input type="number" id="expense" min="0" step="100"></div>
+          </div>
+          <div class="row"><div><label>主なタスク（仕事）</label><textarea id="tasks"></textarea></div></div>
+          <div class="row cols-2">
+            <div><label>改善できたこと</label><textarea id="improve"></textarea></div>
+            <div><label>学習/創作の具体</label><textarea id="study_desc"></textarea></div>
+          </div>
+          <div class="row"><div><label>食事（外食/自炊・内容）</label><textarea id="meals"></textarea></div></div>
+          <div class="row"><label>家事</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap">
+              <label><input type="checkbox" id="house_gomi">ゴミ出し</label>
+              <label><input type="checkbox" id="house_laundry">洗濯</label>
+              <label><input type="checkbox" id="house_clean">掃除</label>
+            </div>
+          </div>
+          <div class="row cols-2">
+            <div><label>交友（会った/連絡した）</label><input type="text" id="social"></div>
+            <div><label>今日の一言</label><input type="text" id="oneword"></div>
+          </div>
+          <div style="display:flex; justify-content:flex-end"><button id="saveBtn" class="primary">保存する</button></div>
+          <div class="muted">※ データは端末のブラウザに保存（localStorage）。PWAとしてホーム追加で使えます。</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>
+          <h2>今週のサマリー</h2>
+          <div class="tabs no-print">
+            <span class="tab active" data-weekstart="1">週始まり：月</span>
+            <span class="tab" data-weekstart="0">週始まり：日</span>
+          </div>
+        </header>
+        <div class="content">
+          <div class="row" style="display:flex; gap:10px; flex-wrap:wrap">
+            <div class="pill">今週の記録数：<b id="kpiEntries">0</b></div>
+            <div class="pill">平均睡眠：<b id="kpiSleep">–</b></div>
+            <div class="pill">平均気分：<b id="kpiMood">–</b></div>
+            <div class="pill">平均痒み：<b id="kpiItch">–</b></div>
+            <div class="pill">学習合計：<b id="kpiStudy">–</b></div>
+          </div>
+          <div class="row"><div id="recentList"></div></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <header><h2>カレンダー</h2></header>
+      <div class="content">
+        <div class="row cols-3">
+          <div><label>表示月</label><input type="month" id="monthPick"></div>
+          <div><label>週始まり</label><select id="weekStartSel"><option value="1">月曜日</option><option value="0">日曜日</option></select></div>
+          <div style="display:flex; justify-content:flex-end"><button id="printMonth">この月を印刷</button></div>
+        </div>
+        <div id="calendar"></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <header><h2>グラフ（直近14日）</h2></header>
+      <div class="content">
+        <canvas id="chartSleep" height="220"></canvas>
+        <canvas id="chartMood" height="220"></canvas>
+        <canvas id="chartItch" height="220"></canvas>
+        <canvas id="chartStudy" height="220"></canvas>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <header><h2>全履歴</h2></header>
+      <div class="content">
+        <table id="table"><thead><tr>
+          <th>日付</th><th>睡眠</th><th>覚醒</th><th>痒み</th><th>GERD</th><th>気分</th><th>学習分</th><th>出費</th><th>要点</th><th></th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <footer>© アラクネログ | PWA対応（ホーム追加推奨）</footer>
+  </main>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const key="arakhne_log_v2"; let WEEK_START=Number(localStorage.getItem("week_start")||1);
+(function init(){ const now=new Date(); $("#date").value=now.toISOString().slice(0,10); $("#monthPick").value=now.toISOString().slice(0,7);
+  $$(".tab").forEach(t=>{ if(Number(t.dataset.weekstart)===WEEK_START) t.classList.add("active"); });
+  $("#weekStartSel").value=WEEK_START; })();
+
+function loadAll(){ try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return[]} }
+function saveAll(d){ localStorage.setItem(key, JSON.stringify(d)) }
+function toMinutes(t){ if(!t||!t.includes(":")) return null; const [h,m]=t.split(":").map(Number); return h*60+m }
+function estimateSleepMins(s,w){ const S=toMinutes(s), W=toMinutes(w); if(S==null||W==null) return null; let d=W-S; if(d<0)d+=1440; return d }
+
+function serialize(){ return {
+  id:crypto.randomUUID(), date:$("#date").value, sleep_time:$("#sleep_time").value||"", wake_time:$("#wake_time").value||"",
+  awakenings:Number($("#awakenings").value||0), itch:Number($("#itch").value||0), mood:Number($("#mood").value||0),
+  gerd:$("#gerd").value, study_min:Number($("#study_min").value||0), expense:Number($("#expense").value||0),
+  tasks:$("#tasks").value.trim(), improve:$("#improve").value.trim(), study_desc:$("#study_desc").value.trim(),
+  meals:$("#meals").value.trim(), house_gomi:$("#house_gomi").checked, house_laundry:$("#house_laundry").checked,
+  house_clean:$("#house_clean").checked, social:$("#social").value.trim(), oneword:$("#oneword").value.trim()
+}}
+function fillForm(r){ $("#date").value=r.date||""; $("#sleep_time").value=r.sleep_time||""; $("#wake_time").value=r.wake_time||"";
+  $("#awakenings").value=r.awakenings??""; $("#itch").value=r.itch??""; $("#mood").value=r.mood??""; $("#gerd").value=r.gerd||"なし";
+  $("#study_min").value=r.study_min??""; $("#expense").value=r.expense??""; $("#tasks").value=r.tasks||""; $("#improve").value=r.improve||"";
+  $("#study_desc").value=r.study_desc||""; $("#meals").value=r.meals||""; $("#house_gomi").checked=!!r.house_gomi;
+  $("#house_laundry").checked=!!r.house_laundry; $("#house_clean").checked=!!r.house_clean; $("#social").value=r.social||""; $("#oneword").value=r.oneword||"" }
+
+function render(){
+  const data=loadAll().sort((a,b)=> a.date<b.date?1:-1);
+  renderKPIs(data); renderRecent(data); renderTable(data); renderCalendar(); renderCharts(data);
+}
+function renderKPIs(data){
+  const now=new Date(); const start=getWeekStart(now,WEEK_START), end=new Date(start); end.setDate(end.getDate()+6);
+  const inWeek=d=>{ const t=new Date(d+"T00:00:00"); return t>=start && t<=end; }
+  const week=data.filter(r=>r.date && inWeek(r.date));
+  $("#kpiEntries").textContent=week.length;
+  const sleep=week.map(r=>estimateSleepMins(r.sleep_time,r.wake_time)).filter(v=>v!=null);
+  $("#kpiSleep").textContent=sleep.length?(sleep.reduce((a,b)=>a+b,0)/sleep.length/60).toFixed(1)+"h":"–";
+  const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length):null;
+  const moods=week.map(r=>+r.mood).filter(n=>!Number.isNaN(n)); $("#kpiMood").textContent=moods.length?avg(moods).toFixed(1):"–";
+  const itch=week.map(r=>+r.itch).filter(n=>!Number.isNaN(n)); $("#kpiItch").textContent=itch.length?avg(itch).toFixed(1):"–";
+  const study=week.map(r=>+r.study_min).filter(n=>!Number.isNaN(n)); $("#kpiStudy").textContent=study.length?study.reduce((a,b)=>a+b,0):"–";
+}
+function renderRecent(data){
+  const recent=data.slice(0,7); const list=$("#recentList"); list.innerHTML="";
+  for(const r of recent){ const mins=estimateSleepMins(r.sleep_time,r.wake_time); const div=document.createElement("div");
+    div.innerHTML=`<div class="pill">${r.date}｜睡眠${mins?(mins/60).toFixed(1)+'h':'–'}｜気分${r.mood??'-'}｜痒み${r.itch??'-'}｜学習${r.study_min??0}分</div>
+                   <div class="muted" style="margin:6px 0 12px">${escapeHtml(r.oneword||"")}</div>`;
+    list.appendChild(div);
+  }
+}
+function renderTable(data){
+  const tbody=$("#table tbody"); tbody.innerHTML="";
+  for(const r of data){ const tr=document.createElement("tr");
+    const mins=estimateSleepMins(r.sleep_time,r.wake_time);
+    const sleep=(r.sleep_time&&r.wake_time)?`${r.sleep_time}–${r.wake_time}（${mins?(mins/60).toFixed(1)+'h':'–'}）`:"";
+    const summary=[r.oneword,r.tasks].filter(Boolean).join(" / ");
+    tr.innerHTML=`<td>${r.date}</td><td>${sleep}</td><td>${r.awakenings??""}</td><td>${r.itch??""}</td><td>${r.gerd??""}</td>
+                  <td>${r.mood??""}</td><td>${r.study_min??""}</td><td>${r.expense? r.expense.toLocaleString():""}</td>
+                  <td>${escapeHtml(summary).slice(0,80)}</td>
+                  <td><button data-edit="${r.id}">編集</button> <button class="danger" data-del="${r.id}">削除</button></td>`;
+    tbody.appendChild(tr);
+  }
+  $$("#table [data-edit]").forEach(btn=> btn.addEventListener("click",()=>{ const id=btn.dataset.edit; const rec=loadAll().find(r=>r.id===id); if(rec){ fillForm(rec); scrollTo({top:0,behavior:"smooth"});} }));
+  $$("#table [data-del]").forEach(btn=> btn.addEventListener("click",()=>{ const id=btn.dataset.del; if(!confirm("削除しますか？"))return; saveAll(loadAll().filter(r=>r.id!==id)); render(); }));
+}
+function renderCalendar(){
+  const ym=$("#monthPick").value; if(!ym) return; const [y,m]=ym.split("-").map(Number);
+  const first=new Date(y,m-1,1); const last=new Date(y,m,0).getDate(); const data=loadAll();
+  const startDay=(first.getDay()-WEEK_START+7)%7; const weeks=Math.ceil((startDay+last)/7);
+  const namesSun=["日","月","火","水","木","金","土"]; const namesMon=["月","火","水","木","金","土","日"]; const names=WEEK_START===1?namesMon:namesSun;
+  let html="<table><thead><tr>"+names.map(n=>`<th>${n}</th>`).join("")+"</tr></thead><tbody>"; let d=1-startDay;
+  for(let w=0;w<weeks;w++){ html+="<tr>"; for(let i=0;i<7;i++){ if(d<1||d>last){ html+="<td></td>"; } else {
+        const ds=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`; const rec=loadAll().find(r=>r.date===ds);
+        let tag=""; if(rec){ const mins=estimateSleepMins(rec.sleep_time,rec.wake_time); tag=`<div class='muted'>睡眠${mins?(mins/60).toFixed(1)+'h':''} 気分${rec.mood??''}</div>` }
+        html+=`<td><div style="font-weight:700">${d}</div>${tag}</td>`; } d++; } html+="</tr>"; }
+  html+="</tbody></table>"; $("#calendar").innerHTML=html;
+}
+function renderCharts(data){
+  const last14=data.slice().sort((a,b)=> a.date<b.date?-1:1).slice(-14);
+  const labels=last14.map(r=>r.date.slice(5));
+  draw($("#chartSleep"),labels,last14.map(r=>toH(estimateSleepMins(r.sleep_time,r.wake_time))),"睡眠(h)",0,12);
+  draw($("#chartMood"),labels,last14.map(r=>num(r.mood)),"気分(0-10)",0,10);
+  draw($("#chartItch"),labels,last14.map(r=>num(r.itch)),"痒み(0-10)",0,10);
+  draw($("#chartStudy"),labels,last14.map(r=>num(r.study_min)),"学習(分)",0, Math.max(60, Math.max(...last14.map(r=>num(r.study_min)||0))+10));
+}
+function num(v){ const n=Number(v); return Number.isFinite(n)?n:null } function toH(m){ return m!=null?+(m/60).toFixed(2):null }
+function draw(c,labels,vals,title,minY,maxY){
+  const ctx=c.getContext("2d"); const W=c.width=c.clientWidth*devicePixelRatio, H=c.height=c.clientHeight*devicePixelRatio;
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--panel-2'); ctx.fillRect(0,0,W,H);
+  const pad=50*devicePixelRatio, w=W-pad*1.2, h=H-pad*1.4;
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--border'); ctx.beginPath(); ctx.moveTo(pad,pad*.4); ctx.lineTo(pad,pad*.4+h); ctx.lineTo(pad+w,pad*.4+h); ctx.stroke();
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--muted'); ctx.font=`${12*devicePixelRatio}px system-ui`;
+  for(let i=0;i<=4;i++){ const y=pad*.4+h-h*i/4; ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+w,y); ctx.stroke();
+    ctx.fillText((minY+(maxY-minY)*i/4).toFixed(0), 8*devicePixelRatio, y+4*devicePixelRatio); }
+  for(let i=0;i<labels.length;i+=Math.max(1,Math.floor(labels.length/7))){ const x=pad+w*(labels.length<=1?0.5:i/(labels.length-1)); ctx.fillText(labels[i], x-10*devicePixelRatio, pad*.4+h+16*devicePixelRatio); }
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--text'); ctx.font=`${14*devicePixelRatio}px system-ui`; ctx.fillText(title, pad, pad*.2);
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--accent'); ctx.lineWidth=2*devicePixelRatio; ctx.beginPath(); let started=false;
+  for(let i=0;i<labels.length;i++){ const v=vals[i]; if(v==null) continue; const x=pad+w*(labels.length<=1?0.5:i/(labels.length-1)); const y=pad*.4+h-((v-minY)/(maxY-minY))*h;
+    if(!started){ctx.moveTo(x,y); started=true;} else ctx.lineTo(x,y); ctx.fillStyle="#ffffffaa"; ctx.beginPath(); ctx.arc(x,y,3*devicePixelRatio,0,Math.PI*2); ctx.fill(); }
+  ctx.stroke();
+}
+function getWeekStart(date, ws){ const d=new Date(date); d.setHours(0,0,0,0); const day=d.getDay(); const diff=(7+day-ws)%7; d.setDate(d.getDate()-diff); return d }
+
+// Actions
+$("#saveBtn").addEventListener("click", ()=>{ const rec=serialize(); let data=loadAll(); const idx=data.findIndex(r=>r.date===rec.date); if(idx>=0){rec.id=data[idx].id; data[idx]=rec;} else data.push(rec);
+  saveAll(data); render(); toast("保存しました"); });
+$("#exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(loadAll(),null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="arakhne_log_export.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0); });
+$("#importBtn").addEventListener("click", ()=>{ const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json"; inp.onchange=()=>{
+  const f=inp.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const arr=JSON.parse(r.result); if(!Array.isArray(arr)) throw new Error("不正な形式"); saveAll(arr); render(); toast("インポートしました"); }catch(e){ alert("失敗: "+e.message) } }; r.readAsText(f,"utf-8"); }; inp.click(); });
+$("#clearBtn").addEventListener("click", ()=>{ if(confirm("本当に全データを削除しますか？")){ localStorage.removeItem(key); render(); } });
+$$(".tab").forEach(t=> t.addEventListener("click", ()=>{ $$(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active"); WEEK_START=Number(t.dataset.weekstart);
+  localStorage.setItem("week_start",WEEK_START); $("#weekStartSel").value=WEEK_START; render(); }));
+$("#weekStartSel").addEventListener("change", ()=>{ WEEK_START=Number($("#weekStartSel").value); localStorage.setItem("week_start",WEEK_START); $$(".tab").forEach(x=>x.classList.toggle("active",Number(x.dataset.weekstart)===WEEK_START)); render(); });
+$("#btnWeeklyPdf").addEventListener("click", ()=>{
+  const data=loadAll().sort((a,b)=>a.date<b.date?-1:1); const now=new Date(); const start=getWeekStart(now,WEEK_START); const end=new Date(start); end.setDate(end.getDate()+6);
+  const inWeek=d=>{ const t=new Date(d+"T00:00:00"); return t>=start && t<=end; }; const week=data.filter(r=>r.date && inWeek(r.date));
+  const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length):null; const sleep=week.map(r=>estimateSleepMins(r.sleep_time,r.wake_time)).filter(v=>v!=null);
+  const avgSleep=sleep.length?(sleep.reduce((a,b)=>a+b,0)/sleep.length/60).toFixed(2)+"h":"–";
+  const avgMood=(()=>{const a=week.map(r=>+r.mood).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–"})();
+  const avgItch=(()=>{const a=week.map(r=>+r.itch).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–"})();
+  const sumStudy=(()=>{const a=week.map(r=>+r.study_min).filter(n=>!Number.isNaN(n));return a.length?a.reduce((x,y)=>x+y,0):0})();
+  const win=window.open("","_blank"); win.document.write(`<html><head><meta charset="utf-8"><title>週次レポート</title>
+    <style>body{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;padding:24px} h1{font-size:20px;margin:0 0 8px}.muted{color:#666}
+    table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:6px 8px;font-size:12px;text-align:left;vertical-align:top}
+    .kpi{display:flex;gap:10px;margin:12px 0}.box{border:1px solid #ccc;padding:8px 10px} @media print{.no-print{display:none}}</style></head><body>
+    <h1>週次レポート</h1><div class="muted">期間：${start.toLocaleDateString()} 〜 ${end.toLocaleDateString()}（週始まり：${WEEK_START===1?"月":"日"}）</div>
+    <div class="kpi"><div class="box">平均睡眠：<b>${avgSleep}</b></div><div class="box">平均気分：<b>${avgMood}</b></div><div class="box">平均痒み：<b>${avgItch}</b></div><div class="box">学習合計：<b>${sumStudy}分</b></div></div>
+    <table><thead><tr><th>日付</th><th>睡眠</th><th>覚醒</th><th>痒み</th><th>GERD</th><th>気分</th><th>学習分</th><th>要点</th></tr></thead><tbody>
+    ${week.map(r=>{ const mins=estimateSleepMins(r.sleep_time,r.wake_time); const sleep=(r.sleep_time&&r.wake_time)?`${r.sleep_time}–${r.wake_time}（${mins?(mins/60).toFixed(1)+'h':'–'}）`:""; const sum=[r.oneword,r.tasks].filter(Boolean).join(" / ");
+      return `<tr><td>${r.date}</td><td>${sleep}</td><td>${r.awakenings??""}</td><td>${r.itch??""}</td><td>${r.gerd??""}</td><td>${r.mood??""}</td><td>${r.study_min??""}</td><td>${escapeHtml(sum)}</td></tr>`; }).join("")}
+    </tbody></table><div style="margin-top:12px" class="no-print"><button onclick="window.print()">PDFに保存（印刷）</button></div></body></html>`);
+  win.document.close(); win.focus();
+});
+$("#monthPick").addEventListener("change", renderCalendar);
+$("#printMonth").addEventListener("click", ()=> window.print());
+$("#btnCalendar").addEventListener("click", ()=> document.querySelector('#calendar').scrollIntoView({behavior:"smooth"}));
+$("#btnCharts").addEventListener("click", ()=> document.querySelector('#chartSleep').scrollIntoView({behavior:"smooth"}));
+
+// PWA register
+if("serviceWorker" in navigator){ window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); }); }
+
+// local notification prompt + simple 22:10 ticker
+async function askNotification(){ if(!("Notification" in window)) return false; if(Notification.permission==="granted") return true;
+  if(Notification.permission!=="denied"){ const p=await Notification.requestPermission(); return p==="granted"; } return false; }
+function scheduleReminder(){ const H=22,M=10; setInterval(()=>{ const n=new Date(); if(n.getHours()===H && n.getMinutes()===M && n.getSeconds()<5){
+  if("Notification" in window && Notification.permission==="granted"){ new Notification("アラクネログ","そろそろ今日のログをつけましょう"); } else { toast("（リマインド）そろそろ今日のログをつけましょう"); } } }, 10000); }
+askNotification().then(ok=>{ if(ok) scheduleReminder(); });
+
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])) }
+function toast(msg){ const t=document.createElement("div"); t.textContent=msg; t.style.position="fixed"; t.style.bottom="18px"; t.style.left="50%"; t.style.transform="translateX(-50%)";
+  t.style.background="rgba(30,34,43,.95)"; t.style.color="white"; t.style.padding="10px 14px"; t.style.borderRadius="10px"; t.style.border="1px solid #2a2f3a"; t.style.zIndex=99;
+  document.body.appendChild(t); setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .4s"; },1200); setTimeout(()=>t.remove(),1700); }
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "アラクネログ",
+  "short_name": "アラクネ",
+  "description": "笠川稀里の生活ダッシュボード（日次ログ）",
+  "start_url": "arakhne_log_pwa.html",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><rect width='256' height='256' fill='%230f1115'/><circle cx='128' cy='128' r='92' fill='%238ab4ff'/><text x='128' y='150' font-size='88' text-anchor='middle' fill='%230f1115'>A</text></svg>",
+      "sizes": "256x256",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
