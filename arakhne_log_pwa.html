@@ -281,7 +281,11 @@ $("#btnCalendar").addEventListener("click", ()=> document.querySelector('#calend
 $("#btnCharts").addEventListener("click", ()=> document.querySelector('#chartSleep').scrollIntoView({behavior:"smooth"}));
 
 // PWA register
-if("serviceWorker" in navigator){ window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); }); }
+<!--
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); });
+}
+-->
 
 // local notification prompt + simple 22:10 ticker
 async function askNotification(){ if(!("Notification" in window)) return false; if(Notification.permission==="granted") return true;
