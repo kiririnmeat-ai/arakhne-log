@@ -4,55 +4,210 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>アラクネログ — 稀里の生活ダッシュボード</title>
-<link rel="manifest" href="arakhne_manifest.json">
-<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="/arakhne-log/arakhne_manifest.json">
+<meta name="theme-color" content="#0b1220">
 <style>
-  :root{ --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --text:#e8ebf0; --muted:#9aa3b2; --accent:#8ab4ff; --border:#272b36; --pill:#2a3040; }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0; font-family: system-ui, -apple-system, "Yu Gothic", sans-serif; background:#0b0d12; color:var(--text)}
-  header{position:sticky; top:0; z-index:5; background:rgba(15,17,21,.85); backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:14px 16px; display:flex; gap:8px; align-items:center; justify-content:space-between}
-  header h1{font-size:18px; margin:0}
-  button{background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:10px 12px; border-radius:10px; cursor:pointer}
-  .primary{background:linear-gradient(180deg,#2a6fff,#2a56ff); border-color:#2147d4}
-  .danger{background:linear-gradient(180deg,#ff4d4d,#e63838); border-color:#a71b1b}
-  main{max-width:1100px; margin:24px auto; padding:0 16px 80px}
-  .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:16px} .card{background:#171a21; border:1px solid var(--border); border-radius:16px; overflow:hidden}
-  .card header{padding:16px} .card .content{padding:16px; display:grid; gap:12px}
-  .row{display:grid; gap:12px} .row.cols-2{grid-template-columns:1fr 1fr} .row.cols-3{grid-template-columns:1fr 1fr 1fr}
-  label{font-size:13px; color:var(--muted); margin-bottom:6px; display:block}
-  input, textarea, select{width:100%; padding:10px 12px; background:#1e222b; border:1px solid var(--border); color:var(--text); border-radius:10px; font-size:14px}
-  textarea{min-height:70px} .muted{color:var(--muted); font-size:12px} .pill{display:inline-flex; gap:8px; padding:6px 10px; background:var(--pill); border-radius:999px; font-size:12px}
-  table{width:100%; border-collapse:collapse; font-size:13px} th,td{border-bottom:1px solid var(--border); padding:8px 10px}
-  .tabs{display:flex; gap:6px; padding:8px 8px 0} .tab{padding:8px 10px; border:1px solid var(--border); background:#1e222b; border-radius:999px; cursor:pointer; font-size:12px}
-  .tab.active{background:#2a3040}
-  canvas{display:block; width:100%; height:200px; background:#1e222b; border:1px solid var(--border); border-radius:12px}
-  @media print{ header,.actions,footer,.no-print{display:none!important} body{background:#fff; color:#000} .card{border:1px solid #ccc} }
-  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+  :root{
+    --bg:#070b14;
+    --bg-alt:#0b1220;
+    --card:#0f172a;
+    --stroke:rgba(148,163,184,.18);
+    --text:#e5ecff;
+    --muted:#9fb0d0;
+    --accent:#60a5ff;
+    --accent-2:#8b5cf6;
+    --glow: 0 10px 30px rgba(96,165,255,.17);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(96,165,255,.08), transparent 40%),
+      radial-gradient(800px 500px at -20% 10%, rgba(139,92,246,.08), transparent 35%),
+      linear-gradient(180deg, var(--bg-alt), var(--bg));
+    color:var(--text);
+    letter-spacing:.1px;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{opacity:.9}
+
+  /* App Bar */
+  .appbar{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:14px 16px;
+    background: color-mix(in srgb, var(--bg-alt) 70%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--stroke);
+  }
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{
+    width:28px; height:28px; border-radius:8px;
+    background: radial-gradient(80% 80% at 30% 20%, #8b5cf6 0%, #60a5ff 35%, #111827 70%);
+    box-shadow: inset 0 0 20px rgba(255,255,255,.08), var(--glow);
+  }
+  h1{font-size:16px; margin:0; font-weight:700}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:12px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.15));
+    color:var(--text); cursor:pointer; transition:.2s transform, .2s box-shadow, .2s opacity;
+  }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  .btn.primary{background:linear-gradient(180deg, #2a6fff, #254adf); border-color:#1f3bb7; box-shadow:0 8px 24px rgba(42,111,255,.25)}
+  .btn.danger{background:linear-gradient(180deg,#ff5757,#e03d3d); border-color:#a41e1e}
+
+  /* Layout */
+  main{max-width:1100px; margin:24px auto; padding:0 16px 96px}
+  .grid{display:grid; grid-template-columns:1.1fr 1fr; gap:16px}
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    border:1px solid var(--stroke);
+    border-radius:var(--radius);
+    box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, var(--glow);
+    overflow:hidden;
+  }
+  .card > header{padding:16px 16px 8px; border-bottom:1px solid var(--stroke); background: color-mix(in srgb, var(--bg-alt) 70%, transparent)}
+  .card h2{font-size:15px; margin:0}
+  .content{padding:16px; display:grid; gap:12px}
+  .row{display:grid; gap:12px}
+  .row.cols-2{grid-template-columns:1fr 1fr}
+  .row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  label{font-size:12px; color:var(--muted); margin-bottom:6px; display:block}
+  input, textarea, select{
+    width:100%; padding:10px 12px; border-radius:12px;
+    background:linear-gradient(180deg, #0c1427, #0a1121);
+    border:1px solid var(--stroke); color:var(--text); font-size:14px;
+    outline:none; transition:border .15s, box-shadow .15s;
+  }
+  input:focus, textarea:focus, select:focus{border-color:#5f97ff; box-shadow:0 0 0 3px rgba(96,165,255,.15)}
+  textarea{min-height:84px}
+  .muted{color:var(--muted); font-size:12px}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:999px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.1)); font-size:12px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{border-bottom:1px solid var(--stroke); padding:10px 10px}
+  th{color:#cdd9ff; font-weight:600; background: color-mix(in srgb, var(--bg-alt) 75%, transparent)}
+  .tabs{display:flex; gap:8px; padding:8px 8px 0}
+  .tab{padding:8px 12px; border:1px solid var(--stroke); border-radius:999px; cursor:pointer; font-size:12px;
+       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.08))}
+  .tab.active{background:linear-gradient(180deg, #1b2a4a, #18223d); border-color:#274477}
+  canvas{display:block; width:100%; height:220px; border-radius:14px; border:1px solid var(--stroke); background:#0a1222}
+
+  /* Save FAB */
+  .fab{
+    position:fixed; right:18px; bottom:88px; z-index:20;
+    border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:10px;
+    background:linear-gradient(180deg,#2a6fff,#254adf); color:white; border:1px solid #2040b8;
+    box-shadow:0 12px 28px rgba(42,111,255,.35); cursor:pointer; font-weight:700;
+  }
+  .fab svg{width:18px; height:18px}
+
+  /* Bottom Nav */
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:15;
+    display:flex; justify-content:space-around; gap:6px; padding:10px 10px env(safe-area-inset-bottom);
+    background: color-mix(in srgb, var(--bg-alt) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-top:1px solid var(--stroke);
+  }
+  .navbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 6px; border-radius:12px;
+          color:var(--muted); border:1px solid transparent; background:transparent}
+  .navbtn.active{color:var(--text); border-color:var(--stroke); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.08))}
+  .navbtn svg{width:18px; height:18px}
+
+  /* Chips (睡眠の時刻プリセット) */
+  .chips { display:flex; gap:6px; }
+  .chip {
+    padding:6px 10px; border:1px solid var(--stroke);
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.08));
+    border-radius:999px; font-size:12px; cursor:pointer;
+  }
+  .chip:active { transform:translateY(1px); opacity:.9 }
+
+  @media print{
+    .appbar,.bottom-nav,.fab{display:none!important}
+    body{background:#fff; color:#000}
+    .card{box-shadow:none; border:1px solid #ccc}
+  }
+  @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-  <header>
-    <h1>🕸️ アラクネログ — 笠川稀里（Kiri）</h1>
+  <header class="appbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <h1>アラクネログ — 笠川稀里</h1>
+    </div>
     <div class="actions">
-      <button id="btnWeeklyPdf">週次レポートPDF</button>
-      <button id="btnCalendar">カレンダー</button>
-      <button id="btnCharts">グラフ</button>
-      <button id="exportBtn">エクスポート</button>
-      <button id="importBtn">インポート</button>
-      <button id="clearBtn" class="danger">全データ削除</button>
+      <button id="btnWeeklyPdf" class="btn">週次PDF</button>
+      <button id="btnCalendar" class="btn">カレンダー</button>
+      <button id="btnCharts" class="btn">グラフ</button>
+      <button id="exportBtn" class="btn">エクスポート</button>
+      <button id="importBtn" class="btn">インポート</button>
+      <button id="clearBtn" class="btn danger">全削除</button>
     </div>
   </header>
 
   <main>
     <div class="grid">
-      <section class="card">
+      <!-- 入力カード -->
+      <section class="card" id="section-input">
         <header><h2>今日のログ入力</h2></header>
         <div class="content">
+          <!-- 就寝/起床（起床日基準） -->
           <div class="row cols-3">
-            <div><label>日付</label><input type="date" id="date"></div>
-            <div><label>就寝</label><input type="time" id="sleep_time"></div>
-            <div><label>起床</label><input type="time" id="wake_time"></div>
+            <div>
+              <label>日付（起床日）</label>
+              <input type="date" id="date">
+              <div class="muted">この日付の「朝」に起きた想定です。</div>
+            </div>
+            <div>
+              <label>就寝（前夜）</label>
+              <div style="display:flex; gap:8px; align-items:center">
+                <input type="time" id="sleep_time" style="flex:1">
+                <div class="chips" data-target="sleep_time">
+                  <button type="button" class="chip">22:30</button>
+                  <button type="button" class="chip">23:00</button>
+                  <button type="button" class="chip">01:00</button>
+                </div>
+              </div>
+              <div class="muted" id="sleep_hint">例：前日の夜に寝た時刻</div>
+            </div>
+            <div>
+              <label>起床（今朝）</label>
+              <div style="display:flex; gap:8px; align-items:center">
+                <input type="time" id="wake_time" style="flex:1">
+                <div class="chips" data-target="wake_time">
+                  <button type="button" class="chip">06:30</button>
+                  <button type="button" class="chip">07:00</button>
+                  <button type="button" class="chip">08:00</button>
+                </div>
+              </div>
+              <div class="muted" id="wake_hint">例：この朝に起きた時刻</div>
+            </div>
           </div>
+
+          <label style="display:inline-flex; gap:8px; align-items:center; margin-top:6px">
+            <input type="checkbox" id="night_mode"> 夜勤/逆転スケジュール
+          </label>
+          <div class="muted" id="mode_hint">
+            OFF：就寝=前夜、起床=今朝 / ON：就寝=当日、起床=翌朝
+          </div>
+
+          <div id="sleep_wake_timeline" class="muted" style="margin-top:6px">
+            昨夜 <span id="tl_sleep">--:--</span> → 今朝 <span id="tl_wake">--:--</span>
+            （推定睡眠：<span id="tl_dur">--h</span>）
+          </div>
+
+          <!-- 体調・学習・出費など -->
           <div class="row cols-3">
             <div><label>覚醒回数</label><input type="number" id="awakenings" min="0" step="1"></div>
             <div><label>痒み（0–10）</label><input type="number" id="itch" min="0" max="10" step="1"></div>
@@ -63,29 +218,31 @@
             <div><label>学習/創作（分）</label><input type="number" id="study_min" min="0" step="5"></div>
             <div><label>大きな出費（円）</label><input type="number" id="expense" min="0" step="100"></div>
           </div>
-          <div class="row"><div><label>主なタスク（仕事）</label><textarea id="tasks"></textarea></div></div>
+          <div class="row"><div><label>主なタスク（仕事）</label><textarea id="tasks" placeholder="例：原稿チームのToDo整理、依頼対応など"></textarea></div></div>
           <div class="row cols-2">
-            <div><label>改善できたこと</label><textarea id="improve"></textarea></div>
-            <div><label>学習/創作の具体</label><textarea id="study_desc"></textarea></div>
+            <div><label>改善できたこと</label><textarea id="improve" placeholder="小さくてもOK。何を良くできた？"></textarea></div>
+            <div><label>学習/創作の具体</label><textarea id="study_desc" placeholder="数学／ゲーム理論／哲学／文章…など"></textarea></div>
           </div>
-          <div class="row"><div><label>食事（外食/自炊・内容）</label><textarea id="meals"></textarea></div></div>
+          <div class="row"><div><label>食事（外食/自炊・内容）</label><textarea id="meals" placeholder="例：自炊：坦々麺、外食：牛丼"></textarea></div></div>
+
           <div class="row"><label>家事</label>
-            <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <div style="display:flex; gap:12px; flex-wrap:wrap">
               <label><input type="checkbox" id="house_gomi">ゴミ出し</label>
               <label><input type="checkbox" id="house_laundry">洗濯</label>
               <label><input type="checkbox" id="house_clean">掃除</label>
             </div>
+            <div class="muted">火/金=可燃、月=不燃/古紙/PET、木=瓶/缶/プラ</div>
           </div>
+
           <div class="row cols-2">
-            <div><label>交友（会った/連絡した）</label><input type="text" id="social"></div>
-            <div><label>今日の一言</label><input type="text" id="oneword"></div>
+            <div><label>交友（会った/連絡した）</label><input type="text" id="social" placeholder="例：まか／かいくら／そのちゃん など"></div>
+            <div><label>今日の一言</label><input type="text" id="oneword" placeholder="心に残ったフレーズや気づき"></div>
           </div>
-          <div style="display:flex; justify-content:flex-end"><button id="saveBtn" class="primary">保存する</button></div>
-          <div class="muted">※ データは端末のブラウザに保存（localStorage）。PWAとしてホーム追加で使えます。</div>
         </div>
       </section>
 
-      <section class="card">
+      <!-- 今週サマリー -->
+      <section class="card" id="section-summary">
         <header>
           <h2>今週のサマリー</h2>
           <div class="tabs no-print">
@@ -106,19 +263,21 @@
       </section>
     </div>
 
-    <section class="card" style="margin-top:16px">
+    <!-- カレンダー -->
+    <section class="card" id="section-calendar" style="margin-top:16px">
       <header><h2>カレンダー</h2></header>
       <div class="content">
         <div class="row cols-3">
           <div><label>表示月</label><input type="month" id="monthPick"></div>
           <div><label>週始まり</label><select id="weekStartSel"><option value="1">月曜日</option><option value="0">日曜日</option></select></div>
-          <div style="display:flex; justify-content:flex-end"><button id="printMonth">この月を印刷</button></div>
+          <div style="display:flex; justify-content:flex-end"><button id="printMonth" class="btn">この月を印刷</button></div>
         </div>
         <div id="calendar"></div>
       </div>
     </section>
 
-    <section class="card" style="margin-top:16px">
+    <!-- グラフ -->
+    <section class="card" id="section-charts" style="margin-top:16px">
       <header><h2>グラフ（直近14日）</h2></header>
       <div class="content">
         <canvas id="chartSleep" height="220"></canvas>
@@ -128,7 +287,8 @@
       </div>
     </section>
 
-    <section class="card" style="margin-top:16px">
+    <!-- 履歴 -->
+    <section class="card" id="section-table" style="margin-top:16px">
       <header><h2>全履歴</h2></header>
       <div class="content">
         <table id="table"><thead><tr>
@@ -136,16 +296,59 @@
         </tr></thead><tbody></tbody></table>
       </div>
     </section>
-
-    <footer>© アラクネログ | PWA対応（ホーム追加推奨）</footer>
   </main>
+
+  <!-- Save FAB -->
+  <button id="saveBtn" class="fab" title="保存">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    保存する
+  </button>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav no-print">
+    <a href="#section-input" class="navbtn" id="navHome">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 10.5l9-7 9 7V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9.5z" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>入力</span>
+    </a>
+    <a href="#section-calendar" class="navbtn" id="navCal">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>カレンダー</span>
+    </a>
+    <a href="#section-charts" class="navbtn" id="navChart">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5m5 14V9m5 10V7m5 12V3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>グラフ</span>
+    </a>
+    <a href="#section-table" class="navbtn" id="navTable">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M9 4v16" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>履歴</span>
+    </a>
+    <button class="navbtn" id="navExport" type="button">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>バックアップ</span>
+    </button>
+  </nav>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const key="arakhne_log_v2"; let WEEK_START=Number(localStorage.getItem("week_start")||1);
-(function init(){ const now=new Date(); $("#date").value=now.toISOString().slice(0,10); $("#monthPick").value=now.toISOString().slice(0,7);
+
+// Nav active
+function setActiveNav(hash){
+  $$(".navbtn").forEach(n=>n.classList.remove("active"));
+  if(hash.startsWith("#section-calendar")) $("#navCal").classList.add("active");
+  else if(hash.startsWith("#section-charts")) $("#navChart").classList.add("active");
+  else if(hash.startsWith("#section-table")) $("#navTable").classList.add("active");
+  else $("#navHome").classList.add("active");
+}
+window.addEventListener("hashchange", ()=> setActiveNav(location.hash));
+setActiveNav(location.hash||"#section-input");
+
+(function init(){
+  const now=new Date(); $("#date").value=now.toISOString().slice(0,10); $("#monthPick").value=now.toISOString().slice(0,7);
   $$(".tab").forEach(t=>{ if(Number(t.dataset.weekstart)===WEEK_START) t.classList.add("active"); });
-  $("#weekStartSel").value=WEEK_START; })();
+  $("#weekStartSel").value=WEEK_START;
+  $("#navExport").addEventListener("click", ()=> $("#exportBtn").click());
+})();
 
 function loadAll(){ try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return[]} }
 function saveAll(d){ localStorage.setItem(key, JSON.stringify(d)) }
@@ -199,7 +402,7 @@ function renderTable(data){
     tr.innerHTML=`<td>${r.date}</td><td>${sleep}</td><td>${r.awakenings??""}</td><td>${r.itch??""}</td><td>${r.gerd??""}</td>
                   <td>${r.mood??""}</td><td>${r.study_min??""}</td><td>${r.expense? r.expense.toLocaleString():""}</td>
                   <td>${escapeHtml(summary).slice(0,80)}</td>
-                  <td><button data-edit="${r.id}">編集</button> <button class="danger" data-del="${r.id}">削除</button></td>`;
+                  <td><button data-edit="${r.id}" class="btn">編集</button> <button class="btn danger" data-del="${r.id}">削除</button></td>`;
     tbody.appendChild(tr);
   }
   $$("#table [data-edit]").forEach(btn=> btn.addEventListener("click",()=>{ const id=btn.dataset.edit; const rec=loadAll().find(r=>r.id===id); if(rec){ fillForm(rec); scrollTo({top:0,behavior:"smooth"});} }));
@@ -207,7 +410,7 @@ function renderTable(data){
 }
 function renderCalendar(){
   const ym=$("#monthPick").value; if(!ym) return; const [y,m]=ym.split("-").map(Number);
-  const first=new Date(y,m-1,1); const last=new Date(y,m,0).getDate(); const data=loadAll();
+  const first=new Date(y,m-1,1); const last=new Date(y,m,0).getDate();
   const startDay=(first.getDay()-WEEK_START+7)%7; const weeks=Math.ceil((startDay+last)/7);
   const namesSun=["日","月","火","水","木","金","土"]; const namesMon=["月","火","水","木","金","土","日"]; const names=WEEK_START===1?namesMon:namesSun;
   let html="<table><thead><tr>"+names.map(n=>`<th>${n}</th>`).join("")+"</tr></thead><tbody>"; let d=1-startDay;
@@ -228,9 +431,9 @@ function renderCharts(data){
 function num(v){ const n=Number(v); return Number.isFinite(n)?n:null } function toH(m){ return m!=null?+(m/60).toFixed(2):null }
 function draw(c,labels,vals,title,minY,maxY){
   const ctx=c.getContext("2d"); const W=c.width=c.clientWidth*devicePixelRatio, H=c.height=c.clientHeight*devicePixelRatio;
-  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--panel-2'); ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--card'); ctx.fillRect(0,0,W,H);
   const pad=50*devicePixelRatio, w=W-pad*1.2, h=H-pad*1.4;
-  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--border'); ctx.beginPath(); ctx.moveTo(pad,pad*.4); ctx.lineTo(pad,pad*.4+h); ctx.lineTo(pad+w,pad*.4+h); ctx.stroke();
+  ctx.strokeStyle="rgba(255,255,255,.08)"; ctx.beginPath(); ctx.moveTo(pad,pad*.4); ctx.lineTo(pad,pad*.4+h); ctx.lineTo(pad+w,pad*.4+h); ctx.stroke();
   ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--muted'); ctx.font=`${12*devicePixelRatio}px system-ui`;
   for(let i=0;i<=4;i++){ const y=pad*.4+h-h*i/4; ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+w,y); ctx.stroke();
     ctx.fillText((minY+(maxY-minY)*i/4).toFixed(0), 8*devicePixelRatio, y+4*devicePixelRatio); }
@@ -238,14 +441,64 @@ function draw(c,labels,vals,title,minY,maxY){
   ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--text'); ctx.font=`${14*devicePixelRatio}px system-ui`; ctx.fillText(title, pad, pad*.2);
   ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--accent'); ctx.lineWidth=2*devicePixelRatio; ctx.beginPath(); let started=false;
   for(let i=0;i<labels.length;i++){ const v=vals[i]; if(v==null) continue; const x=pad+w*(labels.length<=1?0.5:i/(labels.length-1)); const y=pad*.4+h-((v-minY)/(maxY-minY))*h;
-    if(!started){ctx.moveTo(x,y); started=true;} else ctx.lineTo(x,y); ctx.fillStyle="#ffffffaa"; ctx.beginPath(); ctx.arc(x,y,3*devicePixelRatio,0,Math.PI*2); ctx.fill(); }
+    if(!started){ctx.moveTo(x,y); started=true;} else ctx.lineTo(x,y); ctx.fillStyle="#ffffffb0"; ctx.beginPath(); ctx.arc(x,y,3*devicePixelRatio,0,Math.PI*2); ctx.fill(); }
   ctx.stroke();
 }
 function getWeekStart(date, ws){ const d=new Date(date); d.setHours(0,0,0,0); const day=d.getDay(); const diff=(7+day-ws)%7; d.setDate(d.getDate()-diff); return d }
 
-// 保存・操作
-$("#saveBtn").addEventListener("click", ()=>{ const rec=serialize(); let data=loadAll(); const idx=data.findIndex(r=>r.date===rec.date); if(idx>=0){rec.id=data[idx].id; data[idx]=rec;} else data.push(rec);
-  saveAll(data); render(); toast("保存しました"); });
+// === 睡眠ガイド: チップ・深夜ヒント・タイムライン・夜勤案内・保存バリデ ===
+$$(".chips .chip").forEach(ch => {
+  ch.addEventListener("click", () => {
+    const target = ch.parentElement.getAttribute("data-target");
+    const inp = document.getElementById(target);
+    inp.value = ch.textContent.trim();
+    updateTimeline();
+  });
+});
+(function smartDefaultDate(){
+  const now = new Date();
+  const hh = now.getHours();
+  if (hh <= 3) {
+    $("#wake_hint").textContent = "深夜入力：この朝に起きた時刻（例：06:30）";
+    $("#sleep_hint").textContent = "深夜入力：前日の夜に寝た時刻（例：01:00）";
+  }
+})();
+function updateTimeline(){
+  const s = $("#sleep_time").value;
+  const w = $("#wake_time").value;
+  $("#tl_sleep").textContent = s || "--:--";
+  $("#tl_wake").textContent  = w || "--:--";
+  const mins = estimateSleepMins(s, w);
+  $("#tl_dur").textContent = mins != null ? (mins/60).toFixed(1) + "h" : "--h";
+}
+["sleep_time","wake_time","date","night_mode"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", updateTimeline);
+});
+updateTimeline();
+$("#night_mode")?.addEventListener("change", () => {
+  const on = $("#night_mode").checked;
+  $("#mode_hint").textContent = on ?
+    "ON：就寝=当日、起床=翌朝（夜勤など）" :
+    "OFF：就寝=前夜、起床=今朝";
+});
+function validateSleep(){
+  const s = $("#sleep_time").value, w = $("#wake_time").value;
+  const m = estimateSleepMins(s, w);
+  if (s && w && m != null) {
+    if (m < 120) return confirm("睡眠が2時間未満です。本当にこの内容で保存しますか？");
+    if (m > 14*60) return confirm("睡眠が14時間を超えています。誤入力の可能性はありませんか？");
+  }
+  return true;
+}
+
+// === Save / Import / Export / Clear ===
+$("#saveBtn").addEventListener("click", (ev)=>{
+  if(!validateSleep()){ ev.stopImmediatePropagation(); ev.preventDefault(); return; }
+  const rec=serialize(); let data=loadAll(); const idx=data.findIndex(r=>r.date===rec.date);
+  if(idx>=0){rec.id=data[idx].id; data[idx]=rec;} else data.push(rec);
+  saveAll(data); render(); toast("保存しました");
+});
 $("#exportBtn").addEventListener("click", ()=>{ const blob=new Blob([JSON.stringify(loadAll(),null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob);
   const a=document.createElement("a"); a.href=url; a.download="arakhne_log_export.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(url),0); });
 $("#importBtn").addEventListener("click", ()=>{ const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json"; inp.onchange=()=>{
@@ -255,15 +508,15 @@ $$(".tab").forEach(t=> t.addEventListener("click", ()=>{ $$(".tab").forEach(x=>x
   localStorage.setItem("week_start",WEEK_START); $("#weekStartSel").value=WEEK_START; render(); }));
 $("#weekStartSel").addEventListener("change", ()=>{ WEEK_START=Number($("#weekStartSel").value); localStorage.setItem("week_start",WEEK_START); $$(".tab").forEach(x=>x.classList.toggle("active",Number(x.dataset.weekstart)===WEEK_START)); render(); });
 
-// 週次PDF
+// === 週次PDF ===
 $("#btnWeeklyPdf").addEventListener("click", ()=>{
   const data=loadAll().sort((a,b)=>a.date<b.date?-1:1); const now=new Date(); const start=getWeekStart(now,WEEK_START); const end=new Date(start); end.setDate(end.getDate()+6);
   const inWeek=d=>{ const t=new Date(d+"T00:00:00"); return t>=start && t<=end; }; const week=data.filter(r=>r.date && inWeek(r.date));
   const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length):null; const sleep=week.map(r=>estimateSleepMins(r.sleep_time,r.wake_time)).filter(v=>v!=null);
   const avgSleep=sleep.length?(sleep.reduce((a,b)=>a+b,0)/sleep.length/60).toFixed(2)+"h":"–";
-  const avgMood=(()=>{const a=week.map(r=>+r.mood).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–"})();
-  const avgItch=(()=>{const a=week.map(r=>+r.itch).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–"})();
-  const sumStudy=(()=>{const a=week.map(r=>+r.study_min).filter(n=>!Number.isNaN(n));return a.length?a.reduce((x,y)=>x+y,0):0})();
+  const avgMood=(()=>{const a=week.map(r=>+r.mood).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–" })();
+  const avgItch=(()=>{const a=week.map(r=>+r.itch).filter(n=>!Number.isNaN(n));return a.length?avg(a).toFixed(1):"–" })();
+  const sumStudy=(()=>{const a=week.map(r=>+r.study_min).filter(n=>!Number.isNaN(n));return a.length?a.reduce((x,y)=>x+y,0):0 })();
   const win=window.open("","_blank"); win.document.write(`<html><head><meta charset="utf-8"><title>週次レポート</title>
     <style>body{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;padding:24px} h1{font-size:20px;margin:0 0 8px}.muted{color:#666}
     table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:6px 8px;font-size:12px;text-align:left;vertical-align:top}
@@ -277,30 +530,32 @@ $("#btnWeeklyPdf").addEventListener("click", ()=>{
   win.document.close(); win.focus();
 });
 
-// カレンダー/グラフ
-$("#monthPick").addEventListener("change", renderCalendar);
-$("#printMonth").addEventListener("click", ()=> window.print());
-$("#btnCalendar").addEventListener("click", ()=> document.querySelector('#calendar').scrollIntoView({behavior:"smooth"}));
-$("#btnCharts").addEventListener("click", ()=> document.querySelector('#chartSleep').scrollIntoView({behavior:"smooth"}));
+// === スクロールショートカット ===
+$("#btnCalendar").addEventListener("click", ()=> document.querySelector('#section-calendar').scrollIntoView({behavior:"smooth"}));
+$("#btnCharts").addEventListener("click", ()=> document.querySelector('#section-charts').scrollIntoView({behavior:"smooth"}));
 
-// ★ 初期はSW登録オフ（表示安定のため）。動作確認後にコメントを外してOK。
-// if("serviceWorker" in navigator){
-//   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("arakhne_sw.js").catch(console.error); });
-// }
-
-// ローカル通知（22:10リマインド）
+// === 通知（22:10 リマインド例） ===
 async function askNotification(){ if(!("Notification" in window)) return false; if(Notification.permission==="granted") return true;
   if(Notification.permission!=="denied"){ const p=await Notification.requestPermission(); return p==="granted"; } return false; }
 function scheduleReminder(){ const H=22,M=10; setInterval(()=>{ const n=new Date(); if(n.getHours()===H && n.getMinutes()===M && n.getSeconds()<5){
   if("Notification" in window && Notification.permission==="granted"){ new Notification("アラクネログ","そろそろ今日のログをつけましょう"); } else { toast("（リマインド）そろそろ今日のログをつけましょう"); } } }, 10000); }
 askNotification().then(ok=>{ if(ok) scheduleReminder(); });
 
+// === Utils ===
 function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])) }
-function toast(msg){ const t=document.createElement("div"); t.textContent=msg; t.style.position="fixed"; t.style.bottom="18px"; t.style.left="50%"; t.style.transform="translateX(-50%)";
-  t.style.background="rgba(30,34,43,.95)"; t.style.color="white"; t.style.padding="10px 14px"; t.style.borderRadius="10px"; t.style.border="1px solid #2a2f3a"; t.style.zIndex=99;
+function toast(msg){ const t=document.createElement("div"); t.textContent=msg; t.style.position="fixed"; t.style.bottom="72px"; t.style.left="50%"; t.style.transform="translateX(-50%)";
+  t.style.background="linear-gradient(180deg,#0e162a,#0b1324)"; t.style.color="white"; t.style.padding="10px 14px"; t.style.borderRadius="12px"; t.style.border="1px solid var(--stroke)"; t.style.zIndex=99;
   document.body.appendChild(t); setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .4s"; },1200); setTimeout(()=>t.remove(),1700); }
 
 render();
 </script>
+
+<!-- ★ PWAのSW登録は、表示が安定してからコメント解除でOK
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("/arakhne-log/arakhne_sw.js").catch(console.error); });
+}
+</script>
+-->
 </body>
 </html>
